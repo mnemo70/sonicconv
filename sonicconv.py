@@ -17,18 +17,23 @@ import sys
 import struct
 
 print("sonicconv.py -- Sonic Arranger packed format converter")
-print("  By MnemoTroN/Spreadpoint")
+print("by MnemoTroN/Spreadpoint\n")
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 3:
     print("Usage: sonicconv.py <inputfile> <outputfile>")
     sys.exit()
 
+in_filename = sys.argv[1]
 out_filename = sys.argv[2]
 
 # Read complete file. We're not handling gigabytes here.
-with open(sys.argv[1], "rb") as f:
-    dat = f.read()
-    f.close()
+try:
+    with open(in_filename, "rb") as f:
+        dat = f.read()
+        f.close()
+except FileNotFoundError:
+    print(f"Cannot open file: {in_filename}")
+    sys.exit()
 
 dat_len = len(dat)
 print(f"File size: 0x{dat_len:x}")
@@ -103,7 +108,7 @@ for instr_id in range(0, instr_cnt):
     # print(f"instr {instr_id:2}: mode=0x{instr_mode:02x} sample_id=0x{instr_sample_id:02x} _len=0x{instr_sample_len:04x} _repeat=0x{instr_sample_repeat:04x} name={instr_name}")
 
 # Handle samples
-# + 0 long:    number of sample
+# + 0 long:    number of samples
 # + 4 long []: sample length in bytes
 # + xx:        sampledata
 sample_len = 0
@@ -141,7 +146,6 @@ with open(out_filename, "wb") as f:
     for i in range(0, sample_cnt):
         f.write(struct.pack(">L", sample_lengths_from_instr[i] // 2))
     for i in range(0, sample_cnt):
-        # print(f"sample_repeat {i}=0x{sample_repeats[i]}")
         f.write(struct.pack(">L", sample_repeats_from_instr[i]))
     for i in range(0, sample_cnt):
         f.write(sample_names[i])
