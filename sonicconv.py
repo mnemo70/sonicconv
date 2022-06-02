@@ -1,23 +1,26 @@
+#!/usr/bin/env python3
 #
-# Sonic Arranger packed format converter
+# SonicArranger packed format converter
 #
-# This script should restore a binary Sonic Arranger module to its original
-# format that can be loaded into Sonic Arranger again.
+# This script should restore a binary SonicArranger module to its original
+# format that can be loaded into SonicArranger again.
 #
-# By MnemoTroN/Spreadpoint
+# by Thomas Meyer <mnemotron@gmail.com>
 # Created: 2022-05-31
-# Last change: 2022-06-01
+# Last change: 2022-06-02
 #
 # Based on:
 # http://old.exotica.org.uk/tunes/formats/sonic/SONIC_AR.TXT
 # https://github.com/Pyrdacor/SonicArranger/blob/main/Docs/PackedFileFormat.md
 #
+# This is not supposed to be an example of good, structured programming.
+#
 
 import sys
 import struct
 
-print("sonicconv.py -- Sonic Arranger packed format converter")
-print("by MnemoTroN/Spreadpoint\n")
+print("sonicconv -- SonicArranger packed format converter")
+print("by Thomas Meyer\n")
 
 if len(sys.argv) < 3:
     print("Usage: sonicconv.py <inputfile> <outputfile>")
@@ -49,7 +52,7 @@ for index in range(0, dat_len - 0x28, 2):
         break
 
 if offset < 0:
-    print("*** Error: Sonic Arranger module not found in file!")
+    print("*** Error: SonicArranger module not found in file!")
     sys.exit(0)
 else:
     print(f"Song found at offset: 0x{offset:x}")
@@ -105,7 +108,6 @@ for instr_id in range(0, instr_cnt):
         sample_repeats_from_instr[instr_sample_id] = instr_sample_repeat
     # Convert name to Python string
     instr_name = instr_name[:instr_name.index(b"\0")].decode("iso-8859-1")
-    # print(f"instr {instr_id:2}: mode=0x{instr_mode:02x} sample_id=0x{instr_sample_id:02x} _len=0x{instr_sample_len:04x} _repeat=0x{instr_sample_repeat:04x} name={instr_name}")
 
 # Handle samples
 # + 0 long:    number of samples
@@ -120,15 +122,15 @@ for sample_length_offset in range(0, sample_cnt):
 
 sample_data_offset = sample_offset + 4 + sample_cnt * 4
 
-print(f"song=0x{song_offset:x} len=0x{song_len:x} cnt=0x{song_cnt}")
-print(f"over=0x{over_offset:x} len=0x{over_len:x} cnt=0x{over_cnt}")
-print(f"note=0x{note_offset:x} len=0x{note_len:x} cnt=0x{note_cnt}")
-print(f"instr=0x{instr_offset:x} len=0x{instr_len:x} cnt=0x{instr_cnt}")
-print(f"wave=0x{wave_offset:x} len=0x{wave_len:x} cnt=0x{wave_cnt}")
-print(f"adsr=0x{adsr_offset:x} len=0x{adsr_len:x} cnt=0x{adsr_cnt}")
-print(f"amf=0x{amf_offset:x} len=0x{amf_len:x} cnt=0x{amf_cnt}")
-print(f"sample=0x{sample_offset:x} num={sample_cnt}")
-print(f"sample_data=0x{sample_data_offset:x} len=0x{sample_len:x} end=0x{sample_data_offset + sample_len:x}")
+print(f"song=  0x{song_offset:05x} len=0x{song_len:05x} cnt=0x{song_cnt:02x}")
+print(f"over=  0x{over_offset:05x} len=0x{over_len:05x} cnt=0x{over_cnt:02x}")
+print(f"note=  0x{note_offset:05x} len=0x{note_len:05x} cnt=0x{note_cnt:02x}")
+print(f"instr= 0x{instr_offset:05x} len=0x{instr_len:05x} cnt=0x{instr_cnt:02x}")
+print(f"wave=  0x{wave_offset:05x} len=0x{wave_len:05x} cnt=0x{wave_cnt:02x}")
+print(f"adsr=  0x{adsr_offset:05x} len=0x{adsr_len:05x} cnt=0x{adsr_cnt:02x}")
+print(f"amf=   0x{amf_offset:05x} len=0x{amf_len:05x} cnt=0x{amf_cnt:02x}")
+print(f"sample=0x{sample_offset:05x} num=0x{sample_cnt:02x}")
+print(f"sample_data=0x{sample_data_offset:05x} len=0x{sample_len:05x} end=0x{sample_data_offset + sample_len:05x}")
 
 # Write the output file
 with open(out_filename, "wb") as f:
@@ -159,7 +161,7 @@ with open(out_filename, "wb") as f:
     f.write("SYAF".encode('ascii') + struct.pack(">L", amf_cnt))
     f.write(dat[amf_offset:sample_offset])
     f.write("EDATV1.1".encode('ascii'))
-    # TODO Maybe find out what this is
+    # Write some standard editor prefs. These are not in the binary source.
     f.write(bytes.fromhex("00 01 00 01 00 00 00 7b 00 00 00 00 00 01 00 03"))
     f.close()
 
