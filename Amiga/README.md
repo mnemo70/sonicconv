@@ -17,7 +17,7 @@ With an already installed SAS/C you can compile with: `sc sonicconv.c link`
 
 # Usage
 
-Usage: `sonicconv &lt;inputfile&gt; &lt;outputfile&gt;`
+Usage: `sonicconv <inputfile> <outputfile>`
 
 `inputfile` is the name of the binary file containing the SonicArranger
 module.
